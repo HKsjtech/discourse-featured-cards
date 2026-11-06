@@ -1,3 +1,128 @@
 @import "variables";
 @import "mixins";
 @import "card";
+
+.featured-cards-controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: -0.25rem 0 1.5rem;
+
+  &.is-hidden {
+    display: none;
+  }
+}
+
+.featured-cards-dots {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.featured-cards-dot {
+  width: 0.45rem;
+  height: 0.45rem;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: #d9d9d9;
+  cursor: pointer;
+
+  &.is-active {
+    background: #111;
+  }
+}
+
+.featured-cards-nav {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.featured-cards-prev,
+.featured-cards-next {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  cursor: pointer;
+
+  .d-icon {
+    width: 1rem;
+    height: 1rem;
+  }
+
+  &:disabled {
+    cursor: default;
+  }
+}
+
+.featured-cards-prev {
+  background: #f3f3f3;
+  color: #222;
+}
+
+.featured-cards-next {
+  background: #111;
+  color: #fff;
+}
+
+#main-outlet{
+  padding:0;
+}
+#main-outlet .featured-cards-container{
+  margin:0;
+  padding: 0;
+  padding-bottom: 2em;
+  height: 320px;
+  min-height: 320px;
+  column-gap: 1.5rem;
+}
+#main-outlet .featured-cards-container .featured-card{
+  min-width: calc(376px * 0.74);
+  max-width: calc(376px * 0.74);
+}
+#main-outlet .featured-cards-container .featured-card{
+  box-shadow: 0px 11px 29px 0px rgba(0,0,0,0.05);
+  border-radius: 21px 21px 21px 21px;
+}
+
+#main-outlet .featured-cards-dot.is-active {
+  width: 2em;
+  border-radius: 5px 5px 5px 5px;
+  height: .5em;
+}
+#main-outlet .featured-cards-dot{
+  height: .5em;
+  width:.5em;
+}
+#main-outlet .featured-cards-dots{
+  gap:.7rem;
+}
+#main-outlet .featured-cards-nav{
+  gap:1.5rem;
+}
+#main-outlet .featured-cards-container .featured-card a.card-content .card-image .topic-thumbnail, 
+#main-outlet .featured-cards-container .featured-card a.card-content .card-image .topic-thumbnail-placeholder{
+  border-radius: 21px;
+}
+#main-outlet .featured-cards-container .featured-card a.card-content .card-image{
+  min-height: 54%;
+}
+#main-outlet .featured-cards-container .featured-card a.card-content .card-details .topic-title{
+  font-size: 1.15em;
+  line-height: 1.35em;
+  -webkit-line-clamp: 2;
+  margin-bottom: 0;
+  margin-top: .6rem;
+}
+#main-outlet .featured-cards-container .featured-card a.card-content .card-details{
+  padding: 1.5rem 1rem;
+}
+#main-outlet-wrapper.wrap {
+    margin: 4em auto;
+}

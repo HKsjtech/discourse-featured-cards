@@ -6,5 +6,24 @@
       {{featured-card topic=topic}}
     {{/each}}
   </div>
+  <div class="featured-cards-controls">
+    <div class="featured-cards-dots">
+      {{#each filteredTopics as |topic index|}}
+        <button
+          type="button"
+          class="featured-cards-dot"
+          {{action "scrollToIndex" index}}
+        ></button>
+      {{/each}}
+    </div>
+    <div class="featured-cards-nav">
+      <button type="button" class="featured-cards-prev" {{action "scrollPrev"}}>
+        {{d-icon "chevron-left"}}
+      </button>
+      <button type="button" class="featured-cards-next" {{action "scrollNext"}}>
+        {{d-icon "chevron-right"}}
+      </button>
+    </div>
+  </div>
   <PluginOutlet @name="after-featured-cards" @connectorTagName="div" />
 {{/if}}

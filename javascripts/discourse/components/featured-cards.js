@@ -31,8 +31,139 @@ export default Component.extend({
     this.loadTopics();
   },
 
+  didInsertElement() {
+    this._super(...arguments);
+    this._onScroll = () => {
+      if (!this._programmaticScroll) {
+        this.selectedIndex = this.activeCardIndex();
+      }
+      this.updateProgress();
+    };
+    this._onScrollEnd = () => {
+      this._programmaticScroll = false;
+    };
+    this.element.addEventListener("scroll", this._onScroll, true);
+    this.element.addEventListener("scrollend", this._onScrollEnd, true);
+    window.addEventListener("resize", this._onScroll);
+  },
+
+  willDestroyElement() {
+    this._super(...arguments);
+    this.element.removeEventListener("scroll", this._onScroll, true);
+    this.element.removeEventListener("scrollend", this._onScrollEnd, true);
+    window.removeEventListener("resize", this._onScroll);
+    clearTimeout(this._scrollUnlock);
+  },
+
   didRender() {
     this.container = this.element.querySelector(".featured-cards-container");
+    this.updateProgress();
+  },
+
+  cardElements() {
+    return this.container
+      ? [...this.container.querySelectorAll(".featured-card")]
+      : [];
+  },
+
+  activeCardIndex() {
+    const container = this.container;
+    const cards = this.cardElements();
+    if (!container || !cards.length) {
+      return 0;
+    }
+
+    const styles = window.getComputedStyle(container);
+    const pad = parseFloat(styles.paddingLeft) || 0;
+    const origin = container.getBoundingClientRect().left + pad;
+    let active = 0;
+
+    cards.forEach((card, index) => {
+      const rect = card.getBoundingClientRect();
+      if (rect.left - origin <= rect.width / 2) {
+        active = index;
+      }
+    });
+
+    return active;
+  },
+
+  selectIndex(index) {
+    const count = this.cardElements().length;
+    if (!count) {
+      return;
+    }
+
+    this.selectedIndex = Math.min(count - 1, Math.max(0, index));
+    this.scrollCardIntoView(this.selectedIndex);
+    this.updateProgress();
+  },
+
+  scrollCardIntoView(index) {
+    const container = this.container;
+    const card = this.cardElements()[index];
+    if (!container || !card) {
+      return;
+    }
+
+    const styles = window.getComputedStyle(container);
+    const pad = parseFloat(styles.paddingLeft) || 0;
+    const max = container.scrollWidth - container.clientWidth;
+    const delta =
+      card.getBoundingClientRect().left -
+      container.getBoundingClientRect().left -
+      pad;
+    const target = Math.min(max, Math.max(0, container.scrollLeft + delta));
+
+    if (Math.abs(target - container.scrollLeft) <= 1) {
+      return;
+    }
+
+    this._programmaticScroll = true;
+    container.scrollTo({ left: target, behavior: "smooth" });
+    clearTimeout(this._scrollUnlock);
+    this._scrollUnlock = setTimeout(() => {
+      this._programmaticScroll = false;
+    }, 700);
+  },
+
+  scrollByCard(direction) {
+    const current = Number.isInteger(this.selectedIndex)
+      ? this.selectedIndex
+      : this.activeCardIndex();
+    this.selectIndex(current + direction);
+  },
+
+  updateProgress() {
+    const container = this.container;
+    const controls = this.element?.querySelector(".featured-cards-controls");
+    const dots = this.element?.querySelectorAll(".featured-cards-dot");
+    const prev = this.element?.querySelector(".featured-cards-prev");
+    const next = this.element?.querySelector(".featured-cards-next");
+    if (!container || !controls) {
+      return;
+    }
+
+    const cards = this.cardElements();
+    const count = cards.length;
+    const max = container.scrollWidth - container.clientWidth;
+    const active = Math.min(
+      Math.max(Number.isInteger(this.selectedIndex) ? this.selectedIndex : 0, 0),
+      Math.max(count - 1, 0)
+    );
+    this.selectedIndex = active;
+
+    dots?.forEach((dot, index) => {
+      dot.classList.toggle("is-active", index === active);
+    });
+
+    controls.classList.toggle("is-hidden", count < 2 || max <= 1);
+    if (prev) {
+      prev.disabled = active <= 0;
+    }
+    if (next) {
+      next.disabled = count === 0 || active >= count - 1;
+    }
   },
 
   @observes("category")
@@ -54,6 +185,7 @@ export default Component.extend({
         params: loadParams,
       })
       .then((list) => {
+        this.selectedIndex = 0;
         this.set("list", list);
         next(this, () => this.set("isLoading", false)); // Use `next` for CSS animation
       });
@@ -92,6 +224,20 @@ export default Component.extend({
         return false;
       }
     }
+  },
+
+  actions: {
+    scrollPrev() {
+      this.scrollByCard(-1);
+    },
+
+    scrollNext() {
+      this.scrollByCard(1);
+    },
+
+    scrollToIndex(index) {
+      this.selectIndex(Number(index));
+    },
   },
 
   @discourseComputed()
