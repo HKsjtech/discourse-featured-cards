@@ -1,7 +1,9 @@
 import Component from "@ember/component";
+import { inject as service } from "@ember/service";
 import discourseComputed from "discourse-common/utils/decorators";
 
 export default Component.extend({
+  site: service(),
   classNames: "featured-card",
   responsiveRatios: [1, 1.5, 2],
   displayHeight: 500,
@@ -67,6 +69,45 @@ if (largeEnough.lastObject) {
 
 return this.original;
   },
+
+@discourseComputed("topic.category.name")
+categoryLabel(name) {
+  if (!name) {
+    return "";
+  }
+
+  const chars = Array.from(name);
+  if (chars.length <= 11) {
+    return name;
+  }
+
+  return `${chars.slice(0, 11).join("")}…`;
+},
+
+@discourseComputed("topic.category.name")
+categoryLabelDesktop(name) {
+  if (!name) {
+    return "";
+  }
+
+  const chars = Array.from(name);
+  if (chars.length <= 17) {
+    return name;
+  }
+
+  return `${chars.slice(0, 17).join("")}…`;
+},
+
+@discourseComputed("topic.category.url", "topic.category.slug", "topic.category.id")
+categoryUrl(url, slug, id) {
+  if (url) {
+    return url;
+  }
+  if (!slug) {
+    return null;
+  }
+  return `/c/${slug}/${id}`;
+},
 
 @discourseComputed("topic")
 url(topic) {

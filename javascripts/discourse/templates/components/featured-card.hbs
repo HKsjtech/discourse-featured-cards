@@ -31,7 +31,15 @@
   <div class="card-details">
     {{#if (theme-setting "show_category_link")}}
       <div class="topic-header">
-        <div class="category-link">{{category-link topic.category}}</div>
+        <div class="category-link">
+          <a class="badge-category" href={{categoryUrl}}>
+            {{#if site.mobileView}}
+              {{categoryLabel}}
+            {{else}}
+              {{categoryLabelDesktop}}
+            {{/if}}
+          </a>
+        </div>
         <span class="topic-date">{{~format-date
             topic.createdAt
             format="tiny"
